@@ -26,9 +26,13 @@
 </p>
 
 <p>
-  <strong>User:</strong>
-  <%= @idea.user_id %>
+  <strong>Creator:</strong>
+  <%= @idea.user.fullname %>
 </p>
 
-<%= link_to 'Edit', edit_idea_path(@idea) %> |
+<% if current_user && current_user == @idea.user%>
+  <%= link_to 'Destroy', @idea, method: :delete, data: { confirm: 'Are you sure?' } %> |
+  <%= link_to 'Edit', edit_idea_path(@idea) %> |
+<% end %>
+
 <%= link_to 'Back', ideas_path %>
