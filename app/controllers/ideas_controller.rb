@@ -25,8 +25,8 @@ class IdeasController < ApplicationController
   # POST /ideas
   # POST /ideas.json
   def create
-    @idea = Idea.new(idea_params)
-
+    @idea = current_user.ideas.new(idea_params)
+    
     respond_to do |format|
       if @idea.save
         format.html { redirect_to @idea, notice: 'Idea was successfully created.' }
@@ -41,24 +41,34 @@ class IdeasController < ApplicationController
   # PATCH/PUT /ideas/1
   # PATCH/PUT /ideas/1.json
   def update
-    respond_to do |format|
-      if @idea.update(idea_params)
-        format.html { redirect_to @idea, notice: 'Idea was successfully updated.' }
-        format.json { render :show, status: :ok, location: @idea }
-      else
-        format.html { render :edit }
-        format.json { render json: @idea.errors, status: :unprocessable_entity }
+    if current_user == @idea.user
+      respond_to do |format|
+        if @idea.update(idea_params)
+          format.html { redirect_to @idea, notice: 'Idea was successfully updated.' }
+          format.json { render :show, status: :ok, location: @idea }
+        else
+          format.html { render :edit }
+          format.json { render json: @idea.errors, status: :unprocessable_entity }
+        end
       end
+    else
+      format.html { redirect_to @idea, notice: 'You can not edit someone elses idea.' }
+      format.json { render json: @idea.errors, status: :unauthorize }
     end
   end
 
   # DELETE /ideas/1
   # DELETE /ideas/1.json
   def destroy
-    @idea.destroy
-    respond_to do |format|
-      format.html { redirect_to ideas_url, notice: 'Idea was successfully destroyed.' }
-      format.json { head :no_content }
+    if current_user == @idea.user
+      @idea.destroy
+      respond_to do |format|
+        format.html { redirect_to ideas_url, notice: 'Idea was successfully destroyed.' }
+        format.json { head :no_content }
+      end
+    else
+      format.html { redirect_to @idea, notice: 'You can not delete an someones elses idea.' }
+      format.json { render json: @idea.errors, status: :unauthorize }
     end
   end
 
